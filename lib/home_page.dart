@@ -688,17 +688,34 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Komunikat z przyciskami „Cofnij” i „OK”.
+/// Zostaje na ekranie, dopóki nie wciśniesz „OK” (albo „Cofnij”).
 void showUndo(BuildContext context, String message, VoidCallback undo) {
   final messenger = ScaffoldMessenger.of(context);
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(label: 'Cofnij', onPressed: undo),
+  final scheme = Theme.of(context).colorScheme;
+
+  messenger.hideCurrentSnackBar();
+  messenger.showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      // Praktycznie „bez limitu” — zamyka go dopiero przycisk.
+      duration: const Duration(days: 365),
+      content: Row(
+        children: [
+          Expanded(child: Text(message)),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: scheme.inversePrimary),
+            onPressed: () {
+              messenger.hideCurrentSnackBar();
+              undo();
+            },
+            child: const Text('Cofnij'),
+          ),
+        ],
       ),
-    );
+      action: SnackBarAction(label: 'OK', onPressed: () {}),
+    ),
+  );
 }
 
 Future<String?> showTextDialog(
